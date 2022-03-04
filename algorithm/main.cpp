@@ -22,7 +22,9 @@ const QString allFileToString(QFile &aFile)
         return NULL;
     }
     QTextStream in(&aFile);
-    return in.readAll();
+    QString temp = in.readAll();
+    aFile.close();
+    return temp;
 }
 
 void setDataToVector(const QStringList &aStringList,
@@ -34,7 +36,7 @@ void setDataToVector(const QStringList &aStringList,
         vector<double> simple;
         for (size_t i =0;i<stroka.size();i++)
         {
-            if ((stroka[i] != "") && (stroka[i] != "\t"))
+            if ((stroka[i] != "") && (stroka[i] != "\t") && (stroka[i] != "@"))
             {
                 simple.push_back(stroka[i].toDouble());
             }
@@ -82,151 +84,49 @@ vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<doub
 
 int main()
 {
-        vector<vector<double>> matrix{{31.2,-1.32,-7.68,4.09},     //(5, vector<int>(3,0));
-                                      {7.23,-126,7.14,3.04},
-                                      {9.49,6.4,6,8.45},
-                                      {2.68,-3.29,0.28,13.4}};
+    vector< vector <double> > matrix1;
 
-        //vector<vector<double>> copy = matrix;
+    vector<double> b1_temp;
 
-        vector<double> b{-83.32,38.9,-56.7,-504.09};
+    vector<double> x1_temp;
 
-        vector<double> x{10,1,30,-40};
+    QFile file("C:/Users/Миша/Desktop/Хорошо обусловленная матрица.txt");
 
-        vector<double> answer;
+    setDataToVector(allFileToString(file).split("\n"), matrix1);
 
-        answer = Gauss(matrix,b,x);
+    for (size_t row =0; row<matrix1.size();row++)
+    {
+        x1_temp.push_back(matrix1[row][matrix1[row].size()-1]);
+        matrix1[row].pop_back();
+        b1_temp.push_back(matrix1[row][matrix1[row].size()-1]);
+        matrix1[row].pop_back();
+    }
 
-        vector<vector<double>> matrix_2 {   {16.382,-2.049,-41.829,16.392},     //(5, vector<int>(3,0));
-                                            {307.648,-38.466,-840.366,312.528},
-                                            {0.456,-0.057,-1.177,0.456},
-                                            {23.272,-2.909,-66.309,23.872}};
+    vector< vector <double> > matrix2;
 
-        vector<vector<double>> copy_2 = matrix_2;
+    vector<double> b2_temp;
 
-        vector<double> b_2{33.613,710.342,0.949,57.673};
+    vector<double> x2_temp;
 
-        vector<double> x_2{2,60,-1,5};
+    QFile file2("C:/Users/Миша/Desktop/Плохо обусловленная матрица.txt");
 
-        vector<double> answer2;
+    setDataToVector(allFileToString(file2).split("\n"), matrix2);
 
-        answer2 = Gauss(matrix_2,b_2,x_2);
+    for (size_t row =0; row<matrix2.size();row++)
+    {
+        x2_temp.push_back(matrix2[row][matrix2[row].size()-1]);
+        matrix2[row].pop_back();
+        b2_temp.push_back(matrix2[row][matrix2[row].size()-1]);
+        matrix2[row].pop_back();
+    }
+//-------------------------------------------------------------------------------
+    vector<double> answer;
 
-//        expanded_matrix(matrix,b);
+    answer = Gauss(matrix1,b1_temp,x1_temp);
+//--------------------------------------------------------------------------
+    vector<double> answer2;
 
-//        printMatrix(matrix);
-
-//    vector< vector <double> > matrix1;
-//    QFile file("C:/Users/Миша/Desktop/Проверка.txt");
-
-//    setDataToVector(allFileToString(file).split("\n"), matrix1);
-
-//    printMatrix(matrix1);
-
-//    size_t number_of_row = 0; //для того, чтобы спускаться по уровням матрицы
-//                              //например для того, чтобы перейти с матрицы 3x3
-//                              //на матрицу уровня 2x2 и т.д.
-
-//    while (number_of_row < matrix.size())
-//    {
-//        max_in_column(matrix,number_of_row);
-
-//        double a_ii = (double)matrix[number_of_row][number_of_row];
-
-//        for(size_t column=number_of_row; column < matrix[number_of_row].size();column++)
-//        {
-//            matrix[number_of_row][column] = (double)matrix[number_of_row][column]/a_ii;//нормировка текущей строки
-////            double a_i1 = (double)matrix[row][number_of_row];
-////            for(size_t column =number_of_row;column<matrix[row].size();column++)
-////            {
-////                matrix[row][column] = (double)matrix[row][column]/a_i1;
-////            }
-//        }
-
-//        for(size_t row =(number_of_row+1); row < matrix.size();row++)
-//        {
-//            double divider = -1*matrix[row][number_of_row];
-//            vector<double>temp = operator*(matrix[number_of_row],divider);
-//            matrix[row] = operator+(matrix[row],temp);
-//        }
-//        number_of_row++;
-//    }
-
-//    printMatrix(matrix);
-
-//    //обратный ход
-
-//    vector<double> answer(matrix.size()); //задаем вектор ответов размера количества строк в матрице.
-
-//    //k_i = (b_i - sum( от j = k+1 до n = matrix.size())(a_ij*k_j))
-
-//    double sum;
-//    double product; //произведение коэффициента матрицы на число вектора ответов
-
-//    for(int k = (matrix.size()-1); k >= 0;k--) //индексы обхода матрицы
-//    {
-//        sum = 0; //каждый раз обнуляем сумму
-//        for (size_t j =k+1; j <= (matrix.size()-1);j++)
-//        {
-//            product = matrix[k][j] * answer[j];
-//            sum = sum + product;
-//        }
-//        answer[k] = (matrix[k][(matrix[k].size()-1)] - sum);    //matrix[k][k];
-//    }
-
-//    printMatrix(answer);
-
-//    //Оценка невязок
-
-//    vector<double> discrepancy = operator-(x,answer); // вектор невязки
-
-//    printMatrix(discrepancy);
-
-//    double N1 = N_1(discrepancy); //норма 1 невязки
-
-//    double Ninf = N_inf(discrepancy);//норма беск невязки
-
-//    vector<vector<double>> obratka;
-
-//    obratka = inverse_matrix(copy);
-
-//    double norma1_obr_matrix = N_1(obratka);
-
-//    double norma_inf_obr_matrix = N_inf(obratka);
-
-//    double absolute_error_1 = norma1_obr_matrix*N1;
-
-//    double absolute_error_2 = norma_inf_obr_matrix*Ninf;
-
-//    cout <<"Unit Residual Norm and 3 residual "<< endl <<"1:"<< N1 <<endl<<"inf:"<<Ninf<<endl<<endl;
-
-//    cout <<"Absolute_errors"<<endl<<"1:"<< absolute_error_1 << endl <<"inf:"<<absolute_error_2 << endl<<endl;
-
-//    double relative1_error = absolute_error_1/N_1(x);
-
-//    double relative2_error = absolute_error_2/N_inf(x);
-
-//    cout <<"Relative_errors"<<endl<<"1:"<< relative1_error << endl <<"inf:"<<relative2_error << endl<<endl;
-
-//    cout <<"inverse_matrix:"<<endl;
-//    printMatrix(inverse_matrix(copy));
-
-//    double cond1 = N_1(obratka)*N_1(copy);
-
-//    double cond_inf = N_inf(obratka)*N_inf(copy);
-
-//    cout << "cond1:" << endl << cond1<< endl <<"cond_inf:"<<endl << cond_inf<<endl<<endl;
-
-//    vector<vector<double>> matrix_2 {{16.382,-2.049,-41.829,16.392},     //(5, vector<int>(3,0));
-//                                     {307.648,-38.466,-840.366,312.528},
-//                                     {0.456,-0.057,-1.177,0.456},
-//                                     {23.272,-2.909,-66.309,23.872}};
-
-//    vector<vector<double>> copy_2 = matrix_2;
-
-//    vector<double> b_2{33.613,-710.342,0.949,57.673};
-
-//    vector<double> x_2{2,60,-1,5};
+    answer2 = Gauss(matrix2,b2_temp,x2_temp);
 
     return 0;
 }
@@ -238,13 +138,6 @@ vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<doub
     expanded_matrix(matrix,b);
 
     printMatrix(matrix);
-
-//    vector< vector <double> > matrix1;
-//    QFile file("C:/Users/Миша/Desktop/Проверка.txt");
-
-//    setDataToVector(allFileToString(file).split("\n"), matrix1);
-
-//    printMatrix(matrix1);
 
     size_t number_of_row = 0; //для того, чтобы спускаться по уровням матрицы
                               //например для того, чтобы перейти с матрицы 3x3
@@ -259,11 +152,6 @@ vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<doub
         for(size_t column=number_of_row; column < matrix[number_of_row].size();column++)
         {
             matrix[number_of_row][column] = (double)matrix[number_of_row][column]/a_ii;//нормировка текущей строки
-    //            double a_i1 = (double)matrix[row][number_of_row];
-    //            for(size_t column =number_of_row;column<matrix[row].size();column++)
-    //            {
-    //                matrix[row][column] = (double)matrix[row][column]/a_i1;
-    //            }
         }
 
         for(size_t row =(number_of_row+1); row < matrix.size();row++)
@@ -358,7 +246,7 @@ void printMatrix(vector<double> vector)
 {
     for (auto it = vector.begin(); it!=vector.end();it++)
     {
-        cout << scientific <<setprecision(8) <<setw(30) << *it << endl;
+        cout << scientific <<setprecision(10) <<setw(20) << *it << endl;
     }
     cout << endl;
 }
