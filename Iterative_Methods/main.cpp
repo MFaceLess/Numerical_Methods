@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QTextCodec>
 #include <qtextcodec.h>
+#include <QDateTime>
 
 #define n_rows 4
 #define n_cols 3
@@ -105,11 +106,31 @@ int main()
         matrix1[row].pop_back();
     }
 
-    vector<double> answer;
+    vector<double> answer_of_Seidel_method;
+    vector<double> answer_of_Jacobi_method;
+    vector<double> answer_of_Gauss_method;
 
-    answer = Seidel_method(matrix1,b1_temp,x1_temp);
+//    QTime t;
+//    t.start();
+//    int64_t elapsed = t.elapsed();
 
-    printMatrix(answer);
+    qDebug() << QString("[%1]").arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"));
+    answer_of_Seidel_method = Seidel_method(matrix1,b1_temp,x1_temp);
+    qDebug() << QString("[%1]").arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"));
+    printMatrix(answer_of_Seidel_method);
+
+
+    qDebug() << QString("[%1]").arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"));
+    answer_of_Jacobi_method = Jacobi_method(matrix1,b1_temp,x1_temp);
+    qDebug() << QString("[%1]").arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"));
+    printMatrix(answer_of_Jacobi_method);
+
+    qDebug() << QString("[%1]").arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"));
+    answer_of_Gauss_method = Gauss(matrix1,b1_temp,x1_temp);
+    qDebug() << QString("[%1]").arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"));
+    printMatrix(answer_of_Gauss_method);
+
+    return 0;
 }
 
 vector<double> Seidel_method(vector<vector<double>> matrix,vector<double> b,vector<double> x)
@@ -209,8 +230,10 @@ vector<double> Seidel_method(vector<vector<double>> matrix,vector<double> b,vect
     vector<double> sum;
     sum.resize(temp.size());
 
+    int counter =0;
     do
     {
+        counter++;
         for(size_t row=0;row<temp.size();row++)
         {
             sum.clear();
@@ -225,6 +248,16 @@ vector<double> Seidel_method(vector<vector<double>> matrix,vector<double> b,vect
 
         difference = answer[answer.size()-1] - answer[answer.size()-2];
     }while(N_1(difference) >= EPS1);
+
+    vector<double> tmp12345 = x-answer[answer.size()-1];
+    double absolute_errorN_1 = N_1(tmp12345);
+    double absolute_errorN_inf = N_inf(tmp12345);
+    double relative_errorN_1 = absolute_errorN_1/N_1(x);
+    double relative_errorN_inf = absolute_errorN_inf/N_inf(x);
+
+    cout << "relative_errorN_1 of Seidel_method "<<relative_errorN_1<<endl;
+    cout << "relative_errorN_inf of Seidel_method "<<relative_errorN_inf<<endl;
+    cout << "number of iterations of Seidel_method "<<counter<<endl<<endl;
 
     return answer[answer.size()-1];
 }
@@ -283,14 +316,26 @@ vector<double> Jacobi_method(vector<vector<double>> matrix,vector<double> b,vect
     vector<double> difference;
 
     size_t row =0;
+    int counter =0;
     do
     {
+        counter++;
         temp = matrix_multiplication(betta,answer[row])+c;
         answer.push_back(temp);
         row++;
 
         difference = answer[row] - answer[row-1];
     }while(N_1(difference) >= EPS1);
+
+    vector<double> tmp12345 = x-answer[row];
+    double absolute_errorN_1 = N_1(tmp12345);
+    double absolute_errorN_inf = N_inf(tmp12345);
+    double relative_errorN_1 = absolute_errorN_1/N_1(x);
+    double relative_errorN_inf = absolute_errorN_inf/N_inf(x);
+
+    cout << "relative_errorN_1 of Jacobi_method "<<relative_errorN_1<<endl;
+    cout << "relative_errorN_inf of Jacobi_method "<<relative_errorN_inf<<endl;
+    cout << "number of iterations of Jacobi_method "<<counter<<endl<<endl;
 
     return answer[row];
 }
@@ -351,7 +396,7 @@ vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<doub
 
     printMatrix(answer);
 
-    vector<double> discrepancy = operator-(x,answer); // вектор невязки
+    vector<double> discrepancy = operator-(b,matrix_multiplication(copy,answer)); // вектор невязки
 
     printMatrix(discrepancy);
 
