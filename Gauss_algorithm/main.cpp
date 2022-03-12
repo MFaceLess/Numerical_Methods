@@ -1,9 +1,9 @@
 #include <QCoreApplication>
-#include <iostream>
-#include <vector>
 #include <math.h>
 #include <iomanip>
 #include <fstream>
+#include <iostream>
+#include <vector>
 #include <QTextStream>
 #include <QFile>
 #include <QDebug>
@@ -81,6 +81,7 @@ void Get_matrix(vector<vector<double>> matrix, vector<vector<double>> &tmp,int i
 double N_1(vector<double> &matrix);
 double N_inf(vector<double> &matrix);
 vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<double> x);
+vector<double> matrix_multiplication(vector<vector<double>> m1,vector<double> m2);
 
 int main()
 {
@@ -187,7 +188,7 @@ vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<doub
 
     printMatrix(answer);
 
-    vector<double> discrepancy = operator-(x,answer); // вектор невязки
+    vector<double> discrepancy = operator-(b,matrix_multiplication(copy,answer)); // вектор невязки
 
     printMatrix(discrepancy);
 
@@ -199,13 +200,10 @@ vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<doub
 
     obratka = inverse_matrix(copy);
 
-    double norma1_obr_matrix = N_1(obratka);
+    vector<double> temp = x-answer;
+    double absolute_error_1 = N_1(temp);
 
-    double norma_inf_obr_matrix = N_inf(obratka);
-
-    double absolute_error_1 = norma1_obr_matrix*N1;
-
-    double absolute_error_2 = norma_inf_obr_matrix*Ninf;
+    double absolute_error_2 = N_inf(temp);
 
     cout <<"Unit Residual Norm and 3 residual "<< endl <<"1:"<< N1 <<endl<<"inf:"<<Ninf<<endl<<endl;
 
@@ -219,6 +217,11 @@ vector<double> Gauss(vector<vector<double>> &matrix,vector<double> b,vector<doub
 
     cout <<"inverse_matrix:"<<endl;
     printMatrix(inverse_matrix(copy));
+
+    double Condition_number1 = relative1_error/(N_1(discrepancy)/N_1(b));
+    double Condition_numberinf = relative2_error/(N_inf(discrepancy)/N_inf(b));
+
+    cout<<"1_norma V(A)>="<<Condition_number1<<endl<<"inf_norma V(A)>="<<Condition_numberinf<<endl<<endl;
 
     double cond1 = N_1(obratka)*N_1(copy);
 
@@ -531,4 +534,19 @@ double N_inf(vector<double> &matrix)
         }
     }
     return Ninf;
+}
+
+vector<double> matrix_multiplication(vector<vector<double>> m1,vector<double> m2)
+{
+    vector<double> answer;
+    answer.resize(m1.size());
+    for(size_t row=0; row<m1.size(); row++)
+    {
+        answer[row]=0;
+        for(size_t col=0; col<m1[row].size(); col++)
+        {
+            answer[row]+=m1[row][col]*m2[col];
+        }
+    }
+    return answer;
 }
