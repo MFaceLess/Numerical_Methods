@@ -85,6 +85,7 @@ vector<double> Sweep_Method(vector<double> a,
                             vector<double> b,
                             vector<double> c,
                             vector<double> d);
+vector<double> matrix_multiplication(vector<vector<double>> m1,vector<double> m2);
 
 int main()
 {
@@ -127,9 +128,46 @@ int main()
     //запушим 0 в c_n=0
     c.push_back(0);
 //-------------------------------------------------------------------------------
+    vector<vector<double>> coefficient;
+    coefficient.resize(b.size());
+    for(int i=0;i<coefficient.size();i++)
+    {
+        coefficient[i].resize(b.size());
+    }
+    for(size_t row =0;row<coefficient.size();row++)
+    {
+        for(size_t col =0;col<coefficient[row].size();col++)
+        {
+            if (col == row)
+            {
+                coefficient[row][col] = b[row];
+            }
+            if (row == col+1)
+            {
+                coefficient[row][col] = a[row];
+            }
+            if (row+1 == col)
+            {
+                coefficient[row][col] = c[row];
+            }
+        }
+    }
+//-------------------------------------------------------------------------------
     vector<double> answer;
     answer = Sweep_Method(a,b,c,d);
+    cout<<"answer"<<endl;
     printMatrix(answer);
+//------------------------------------------------------------------------------
+    vector<double> discrepancy1 = operator-(d,matrix_multiplication(coefficient,answer)); // вектор невязки
+
+    cout<<"discrepancy"<<endl;
+    printMatrix(discrepancy1);
+
+    double N1_temp = N_1(discrepancy1); //норма 1 невязки
+
+    double Ninf_temp = N_inf(discrepancy1);//норма беск невязки
+
+    cout << "N1:" << N1_temp <<endl <<"Ninf:"<< Ninf_temp<<endl<<endl;
 //------------------------------------------------------------------------------
 //change several coefficients to 0.01
     for (size_t k =0; k<d.size();k++)
@@ -139,12 +177,13 @@ int main()
 
     vector<double> stability;
     stability = Sweep_Method(a,b,c,d);
+    cout<<"changing answer"<<endl;
     printMatrix(stability);
 //-------------------------------------------------------------------------------
 //вычисляем устойчивость
-    vector<double> discrepancy = operator-(answer,stability); // вектор невязки
+    vector<double> discrepancy = operator-(d,matrix_multiplication(coefficient,stability)); // вектор невязки
 
-    cout<<"discrepancy"<<endl;
+    cout<<"stability"<<endl;
     printMatrix(discrepancy);
 
     double N1 = N_1(discrepancy); //норма 1 невязки
@@ -581,4 +620,19 @@ double N_inf(vector<double> &matrix)
         }
     }
     return Ninf;
+}
+
+vector<double> matrix_multiplication(vector<vector<double>> m1,vector<double> m2)
+{
+    vector<double> answer;
+    answer.resize(m1.size());
+    for(size_t row=0; row<m1.size(); row++)
+    {
+        answer[row]=0;
+        for(size_t col=0; col<m1[row].size(); col++)
+        {
+            answer[row]+=m1[row][col]*m2[col];
+        }
+    }
+    return answer;
 }
